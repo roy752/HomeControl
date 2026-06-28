@@ -29,10 +29,31 @@ Write-Host "Running tests..."
 
 if (-not (Get-Service -Name $ServiceName -ErrorAction SilentlyContinue)) {
     Write-Host "Installing Windows service '$ServiceName'..."
-    nssm install $ServiceName $pythonExe
-    nssm set $ServiceName AppDirectory $repo
-    nssm set $ServiceName AppParameters "-m uvicorn main:app --host 0.0.0.0 --port $Port"
-    nssm set $ServiceName Start SERVICE_AUTO_START
+
+    # Resolve nssm executable: allow overriding with NSSM_EXE env var
+    $nssmExe = $env:NSSM_EXE
+    if (-not $nssmExe) {
+        $cmd = Get-Command nssm -ErrorAction SilentlyContinue
+        if ($cmd -and $cmd.Path) { $nssmExe = $cmd.Path }
+        elseif ($cmd -and $cmd.Source) { $nssmExe = $cmd.Source }
+    }
+
+    # Common fallback locations where nssm.exe is often installed
+    $commonPaths = @("C:\nssm\nssm.exe","C:\Program Files\nssm\nssm.exe","C:\Program Files (x86)\nssm\nssm.exe")
+    foreach ($p in $commonPaths) {
+        if (-not $nssmExe -and (Test-Path $p)) { $nssmExe = $p }
+    }
+
+    if (-not $nssmExe) {
+        Write-Error "nssm not found. Set NSSM_EXE environment variable to full path, or ensure nssm is on the service PATH."
+        exit 1
+    }
+
+    Write-Host "Using nssm: $nssmExe"
+    & $nssmExe install $ServiceName $pythonExe
+    & $nssmExe set $ServiceName AppDirectory $repo
+    & $nssmExe set $ServiceName AppParameters "-m uvicorn main:app --host 0.0.0.0 --port $Port"
+    & $nssmExe set $ServiceName Start SERVICE_AUTO_START
 }
 
 Write-Host "Restarting service '$ServiceName'..."
