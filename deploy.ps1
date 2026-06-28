@@ -1,6 +1,6 @@
 param(
     [string]$ServiceName = "HomeControl",
-    [int]$Port = 8000
+    [int]$Port = 11090
 )
 
 $ErrorActionPreference = "Stop"
