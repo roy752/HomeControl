@@ -22,9 +22,22 @@ Write-Host "Installing Python dependencies..."
 Write-Host "Running tests..."
 & $pythonExe -m pytest -q
 
-if (-not (Get-Command nssm -ErrorAction SilentlyContinue)) {
-    Write-Host "nssm not found. Install NSSM from https://nssm.cc/download/ to register the Windows service."
-    return
+## Check for NSSM: some environments don't return Get-Command though nssm is callable.
+$hasNssm = $false
+if (Get-Command nssm -ErrorAction SilentlyContinue) {
+    $hasNssm = $true
+} else {
+    try {
+        $whereResult = & where.exe nssm 2>$null
+        if ($whereResult) { $hasNssm = $true }
+    } catch {
+        # ignore
+    }
+}
+
+if (-not $hasNssm) {
+    Write-Error "nssm not found. Install NSSM from https://nssm.cc/download/ to register the Windows service."
+    exit 1
 }
 
 if (-not (Get-Service -Name $ServiceName -ErrorAction SilentlyContinue)) {
