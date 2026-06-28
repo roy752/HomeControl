@@ -30,4 +30,4 @@ jobs:
       - name: Deploy service
         shell: pwsh
         run: |
-          ./deploy.ps1 -ServiceName HomeControl -Port 11090
+          ./deploy.ps1 -ServiceName HomeControl -Port 11010
