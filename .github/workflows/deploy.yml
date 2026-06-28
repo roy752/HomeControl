@@ -17,17 +17,17 @@ jobs:
           python-version: '3.11'
 
       - name: Install dependencies
-        shell: pwsh
+        shell: powershell
         run: |
           python -m pip install --upgrade pip
           python -m pip install -r requirements.txt
 
       - name: Run tests
-        shell: pwsh
+        shell: powershell
         run: |
           python -m pytest -q
 
       - name: Deploy service
-        shell: pwsh
+        shell: powershell
         run: |
-          ./deploy.ps1 -ServiceName HomeControl -Port 11010
+          .\deploy.ps1 -ServiceName HomeControl -Port 11090
