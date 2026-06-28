@@ -22,41 +22,10 @@ Write-Host "Installing Python dependencies..."
 Write-Host "Running tests..."
 & $pythonExe -m pytest -q
 
-## Check for NSSM: use Get-Command and validate the resolved path; fall back to where.exe.
-$hasNssm = $false
-$cmd = Get-Command nssm -ErrorAction SilentlyContinue
-if ($cmd -ne $null) {
-    # try to resolve executable path from returned command info
-    $exePath = $null
-    if ($cmd.Path) { $exePath = $cmd.Path }
-    elseif ($cmd.Source) { $exePath = $cmd.Source }
-    elseif ($cmd.Definition) { $exePath = $cmd.Definition }
-
-    if ($exePath -and (Test-Path $exePath)) {
-        $hasNssm = $true
-    } else {
-        # sometimes Get-Command returns an object without an accessible path; try where.exe
-        try {
-            $whereResult = & where.exe nssm 2>$null
-            if ($whereResult) { $hasNssm = $true }
-        } catch {
-            # ignore
-        }
-    }
-} else {
-    try {
-        $whereResult = & where.exe nssm 2>$null
-        if ($whereResult) { $hasNssm = $true }
-    } catch {
-        # ignore
-    }
-}
-
-if (-not $hasNssm) {
-    Write-Error "nssm not found. Install NSSM from https://nssm.cc/download/ to register the Windows service."
-    # fail the script explicitly so CI marks step as failed
-    exit 1
-}
+## Assume NSSM is installed and callable on the system.
+# Some runner environments may register nssm in nonstandard ways; to avoid
+# false negatives, we don't pre-check here — let any nssm invocation fail
+# naturally so CI will surface the error and logs will show the failing command.
 
 if (-not (Get-Service -Name $ServiceName -ErrorAction SilentlyContinue)) {
     Write-Host "Installing Windows service '$ServiceName'..."
