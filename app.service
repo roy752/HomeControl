@@ -1,0 +1,15 @@
+# Windows 10용 서비스 실행 예시
+# NSSM(Non-Sucking Service Manager) 사용
+#
+# 1) NSSM 설치
+#    https://nssm.cc/download/
+#
+# 2) 서비스 등록 예시
+#    nssm install HomeControl "C:\Path\To\Python\python.exe"
+#    nssm set HomeControl AppDirectory "C:\Path\To\HomeControl"
+#    nssm set HomeControl AppParameters "-m uvicorn main:app --host 0.0.0.0 --port 8000"
+#    nssm start HomeControl
+#
+# 3) 서비스 상태 확인
+#    sc query HomeControl
+#    nssm status HomeControl
